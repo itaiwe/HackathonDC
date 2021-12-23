@@ -17,7 +17,7 @@ class Client:
             # creating udp socket
             udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # setting UDP socket
             udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1) # enabling option to broadcast for ip address
-            udp_socket.bind(("", self.port))
+            # udp_socket.bind(("", self.port))
             
             data, address = udp_socket.recvfrom(4096) ##check that
             info = struct.unpack("Ibh", data) ##I-unsigned int 4B b-signed char 1B h-short 2B
@@ -56,6 +56,6 @@ class Client:
         pass
     
 magic_cookie, msg_type, port = 0xabcddcba, 0x2, 13117
-team_name = ""
+team_name = '""'
 client = Client(team_name, magic_cookie, msg_type, port)
 client.run_client()
