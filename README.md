@@ -1,13 +1,21 @@
 # HackathonDC
+
 Client finished
+
 Server finished
 
-next steps:
-add timeouts
-add equations
+## next steps:
+
+add timeouts mybe finished
+
+add equations some exemples
+
 try running
 
-(Bonuses:)
+## (Bonuses:)
+
 add statistics
+
 improve printing
+
 add colors and visualizations

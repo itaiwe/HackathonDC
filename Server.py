@@ -8,18 +8,19 @@ import random
 
 
 class server:
-    def __init__(self, port_udp, cookie, msg_type, tcp_port):
+    def __init__(self, port_udp, cookie, msg_type, tcp_port,equations):
         self.port = port_udp
         self.cookie = cookie
         self.msg_type = msg_type
         self.server_ip = scapy.get_if_addr(scapy.conf.iface)
         self.tcp_port = tcp_port
         self.users = 0
-        self.equations = []
+        self.equations = equations
         self.flag = False
         self.message = ""
         self.mutex = threading.Lock()
         self.team_names = []
+        self.sockets=[]
         
     def send_udp_offer(self, tcp_port, udp_socket:socket):
         while self.users < 2:
@@ -40,21 +41,25 @@ class server:
             print(f"Server started, listening on IP address {self.server_ip}")
             t = threading.Thread(self.send_udp_offer, args=(self.tcp_port, udp_socket))
             t.start()
-            self.team_names, sockets = self.listen_tcp(tcp_socket)
+            self.team_names, self.sockets = self.listen_tcp(tcp_socket)
             time.sleep(10)
             question, answer = random.choice(self.equations)
             message = f"""Welcome to Quick Maths.
             Player 1: {self.team_names[0]}Player 2: {self.team_names[1]}==
             Please answer the following question as fast as you can:
             How much is: {question}?""".encode() #add formula here
-            thread_player1 = threading.Thread(self.game_mode, args=(sockets[0], message, answer, 0))
-            thread_player2 = threading.Thread(self.game_mode, args=(sockets[1], message, answer, 1))
+            self.message = f'Game over!\nThe correct answer was {answer}!\n\nGame ended in a draw!'
+            thread_player1 = threading.Thread(self.game_mode, args=(self.sockets[0], message, answer, 0))
+            thread_player2 = threading.Thread(self.game_mode, args=(self.sockets[1], message, answer, 1))
+            thread_game=threading.Thread(self.count_game)
             thread_player1.start()
             thread_player2.start()
+            thread_game.start()
             thread_player1.join()
             thread_player2.join()
-            sockets[0].close() #check that
-            sockets[1].close() #check that
+            thread_game.join()
+            self.sockets[0].close() #check that
+            self.sockets[1].close() #check that
             print("Game over, sending out offer requests...")
                 
             
@@ -64,6 +69,7 @@ class server:
         while self.users < 2:
             try:
                 team_socket, _ = tcp_socket.accept()
+                team_socket.settimeout(1)
                 sockets.append(team_socket)
                 team_name = team_socket.recv(4096).decode()
                 team_names.append(team_name)
@@ -75,8 +81,9 @@ class server:
     
     def game_mode(self, player_socket, welcome_message, answer, idx):
         player_socket.send(welcome_message)
-        t1 = time.time()
-        while time.time() - t1 <= 10 or self.flag:
+        # t1 = time.time()
+        # while time.time() - t1 <= 10 or self.flag:
+        try:
             data = player_socket.recv(4096).decode()
             self.mutex.acquire(1)
             if data == answer:
@@ -85,7 +92,18 @@ class server:
                 self.message = f'Game over!\nThe correct answer was {answer}!\n\nCongratulations to the winner: {self.team_names[abs(idx - 1)]}'.strip('\n')
             self.flag = True
             self.mutex.release()
-        if not self.flag:
-            self.message = f'Game over!\nThe correct answer was {answer}!\n\nGame ended in a draw!'
+        except:
+            pass
         player_socket.send(self.message)
-    
+
+    def count_game(self):
+        t1 = time.time()
+        while time.time() - t1 <= 10:
+            if self.flag:
+                break
+        for s in self.sockets:
+            s.setbloking(False)
+
+equations=[("3+3","6"),("3+2","5"),("1+2","3"),("7+1","8"),("1+1","2")]
+s=server(13117,0xabcddcba,0x2,13117,equations)
+s.run_server()
