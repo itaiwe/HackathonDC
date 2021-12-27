@@ -32,6 +32,7 @@ class server:
     def run_server(self):
         udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # setting UDP socket
         udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1) # enabling option to broadcast for ip address
+        udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         udp_socket.bind((self.server_ip, self.port))
         tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # setting TCP socket
         tcp_socket.bind((self.server_ip, self.port))
@@ -60,12 +61,15 @@ class server:
             thread_game.join()
             self.sockets[0].close() #check that
             self.sockets[1].close() #check that
+            self.users = 0
+            self.flag = False
             print("Game over, sending out offer requests...")
                 
             
     def listen_tcp(self, tcp_socket):
         team_names, sockets = [], []
         tcp_socket.listen(2)
+        tcp_socket.settimeout(10)
         while self.users < 2:
             try:
                 team_socket, _ = tcp_socket.accept()
@@ -75,7 +79,7 @@ class server:
                 team_names.append(team_name)
                 self.users += 1
             except socket.timeout:
-                break 
+                continue 
         return team_names, sockets
     
     
@@ -83,26 +87,34 @@ class server:
         player_socket.send(welcome_message)
         # t1 = time.time()
         # while time.time() - t1 <= 10 or self.flag:
+        t1=time.time()
+        while time.time()-t1<=10 and not self.flag:
+            try:
+                player_socket.settimeout(0.1)
+                data = player_socket.recv(2048).decode()
+                self.mutex.acquire(1)
+                if data == answer and not self.flag:
+                    self.message = f'Game over!\nThe correct answer was {answer}!\n\nCongratulations to the winner: {self.team_names[idx]}'.strip('\n')
+                else:
+                    self.message = f'Game over!\nThe correct answer was {answer}!\n\nCongratulations to the winner: {self.team_names[abs(idx - 1)]}'.strip('\n')
+                self.flag = True
+                self.mutex.release()
+            except:
+                pass
         try:
-            data = player_socket.recv(2048).decode()
-            self.mutex.acquire(1)
-            if data == answer and not self.flag:
-                self.message = f'Game over!\nThe correct answer was {answer}!\n\nCongratulations to the winner: {self.team_names[idx]}'.strip('\n')
-            else:
-                self.message = f'Game over!\nThe correct answer was {answer}!\n\nCongratulations to the winner: {self.team_names[abs(idx - 1)]}'.strip('\n')
-            self.flag = True
-            self.mutex.release()
+            player_socket.send(self.message.encode())
         except:
             pass
-        player_socket.send(self.message)
 
     def count_game(self):
-        t1 = time.time()
-        while time.time() - t1 <= 10:
-            if self.flag:
-                break
-        for s in self.sockets:
-            s.setbloking(False)
+        # t1 = time.time()
+        # while time.time() - t1 <= 10:
+        #     if self.flag:
+        #         break
+        time.sleep(10)
+        self.flag = True
+        # for s in self.sockets:
+        #     s.setblocking(False)
 
 s=server()
 s.run_server()
