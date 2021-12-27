@@ -5,11 +5,11 @@ from datetime import datetime
 import msvcrt
 
 class Client:
-    def __init__(self, team, cookie, msg_type, port):
+    def __init__(self, team):
         self.name = team
-        self.cookie = cookie
-        self.msg_type = msg_type
-        self.port = port
+        self.cookie = 0xabcddcba
+        self.msg_type = 0x2
+        self.port = 13117
     
     def run_client(self):
         while True:
@@ -19,7 +19,7 @@ class Client:
             udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1) # enabling option to broadcast for ip address
             # udp_socket.bind(("", self.port))
             
-            data, address = udp_socket.recvfrom(4096) ##check that
+            data, address = udp_socket.recvfrom(2048) ##check that
             info = struct.unpack("Ibh", data) ##I-unsigned int 4B b-signed char 1B h-short 2B
             tcp_ip = address[0]
             tcp_socket = self.check_offers(info, tcp_ip)
@@ -40,7 +40,7 @@ class Client:
         
     
     def game_mode(self, tcp_socket):
-        data=tcp_socket.recv(4096)
+        data=tcp_socket.recv(2048)
         print(data.decode())
         t1=time.time()
         while(time.time()-t1<=10):
@@ -49,13 +49,12 @@ class Client:
                 if key.isnumeric():
                     massage=key.encode()##check encode type!
                     tcp_socket.send(massage)
-        summary=tcp_socket.recv(4096)
+        summary=tcp_socket.recv(2048)
         print(summary.decode())
         tcp_socket.close()
         print("Server disconnected, listening for offer requests...")
         pass
     
-magic_cookie, msg_type, port = 0xabcddcba, 0x2, 13117
 team_name = '""'
-client = Client(team_name, magic_cookie, msg_type, port)
+client = Client(team_name)
 client.run_client()
