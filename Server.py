@@ -8,12 +8,12 @@ import random
 
 
 class server:
-    def __init__(self, tcp_port): #maybe add eth and set to eth1 or eth2 when creating server
+    def __init__(self): #maybe add eth and set to eth1 or eth2 when creating server
         self.port = 13117
         self.cookie = 0xabcddcba
         self.msg_type = 0x2
         self.server_ip = scapy.get_if_addr(scapy.conf.iface) #scapy.conf.iface
-        self.tcp_port = tcp_port
+        self.tcp_port = 25000
         self.users = 0
         self.equations = [("3+3","6"),("3+2","5"),("1+2","3"),("7+1","8"),("1+1","2")]
         self.flag = False
@@ -104,5 +104,5 @@ class server:
         for s in self.sockets:
             s.setbloking(False)
 
-s=server(13117)
+s=server()
 s.run_server()
