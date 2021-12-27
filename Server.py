@@ -86,7 +86,7 @@ class server:
         try:
             data = player_socket.recv(2048).decode()
             self.mutex.acquire(1)
-            if data == answer:
+            if data == answer and not self.flag:
                 self.message = f'Game over!\nThe correct answer was {answer}!\n\nCongratulations to the winner: {self.team_names[idx]}'.strip('\n')
             else:
                 self.message = f'Game over!\nThe correct answer was {answer}!\n\nCongratulations to the winner: {self.team_names[abs(idx - 1)]}'.strip('\n')

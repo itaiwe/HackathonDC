@@ -2,7 +2,7 @@ import socket
 import struct
 import time
 from datetime import datetime
-import msvcrt
+import getch
 
 class Client:
     def __init__(self, team):
@@ -44,17 +44,15 @@ class Client:
         print(data.decode())
         t1=time.time()
         while(time.time()-t1<=10):
-            if msvcrt.kbhit():
-                key=msvcrt.getch().decode()
-                if key.isnumeric():
-                    massage=key.encode()##check encode type!
-                    tcp_socket.send(massage)
+            key=getch.getch()
+            massage=key.encode()##check encode type!
+            tcp_socket.send(massage)
         summary=tcp_socket.recv(2048)
         print(summary.decode())
         tcp_socket.close()
         print("Server disconnected, listening for offer requests...")
         pass
     
-team_name = '""'
+team_name = 'Shalev&Itai'
 client = Client(team_name)
 client.run_client()
