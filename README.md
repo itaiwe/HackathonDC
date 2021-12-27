@@ -1,16 +1,14 @@
 # HackathonDC
 
-Client finished
+Client finished 
 
 Server finished
 
 ## next steps:
 
-add timeouts mybe finished
+fix:
 
-add equations some exemples
-
-try running
+Client->game_mode: getch func stuck at waiting to key press
 
 ## (Bonuses:)
 
@@ -18,4 +16,4 @@ add statistics
 
 improve printing
 
-add colors and visualizations
+add colors and visualizations # has librery just adding to the output

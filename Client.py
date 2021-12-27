@@ -9,7 +9,7 @@ class Client:
         self.name = team
         self.cookie = 0xabcddcba
         self.msg_type = 0x2
-        self.port = 13117
+        self.port = 13117#change port to check
     
     def run_client(self):
         while True:
@@ -17,7 +17,8 @@ class Client:
             # creating udp socket
             udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # setting UDP socket
             udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1) # enabling option to broadcast for ip address
-            # udp_socket.bind(("", self.port))
+            udp_socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEPORT, 1)
+            udp_socket.bind(("", self.port))
             
             data, address = udp_socket.recvfrom(2048) ##check that
             info = struct.unpack("Ibh", data) ##I-unsigned int 4B b-signed char 1B h-short 2B
@@ -42,10 +43,11 @@ class Client:
     def game_mode(self, tcp_socket):
         data=tcp_socket.recv(2048)
         print(data.decode())
+        key=None
         t1=time.time()
-        while(time.time()-t1<=10):
-            key=getch.getch()
-            massage=key.encode()##check encode type!
+        while(time.time()-t1<=10 and key is None):
+            key=getch.getch() #blocks code and waits for key
+            massage=key.encode()
             tcp_socket.send(massage)
         summary=tcp_socket.recv(2048)
         print(summary.decode())
