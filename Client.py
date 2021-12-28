@@ -3,6 +3,7 @@ import struct
 import time
 from datetime import datetime
 import getch
+import multiprocessing as mul_proc# import threading
 
 class Client:
     def __init__(self, team):
@@ -10,10 +11,12 @@ class Client:
         self.cookie = 0xabcddcba
         self.msg_type = 0x2
         self.port = 13117#change port to check
+        self.flag=True
     
     def run_client(self):
         while True:
             print("Client started, listening for offer requests...")
+            self.flag=True
             # creating udp socket
             udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # setting UDP socket
             udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1) # enabling option to broadcast for ip address
@@ -43,18 +46,28 @@ class Client:
     def game_mode(self, tcp_socket):
         data=tcp_socket.recv(2048)
         print(data.decode())
-        key=None
-        t1=time.time()
-        while(time.time()-t1<=10 and key is None):
-            key=getch.getch() #blocks code and waits for key
-            massage=key.encode()
-            tcp_socket.send(massage)
-        summary=tcp_socket.recv(2048)
+        p=mul_proc.Process(target=self.get_user_key,args=(tcp_socket))
+        p.start()
+        while self.flag:
+            try:
+                tcp_socket.settimeout(0.1)
+                summary=tcp_socket.recv(2048)
+                self.flag=False
+            except:
+                pass
+        p.terminate()
+        p.join()
         print(summary.decode())
         tcp_socket.close()
         print("Server disconnected, listening for offer requests...")
         pass
     
+    def get_user_key(self,tcp_socket):
+        key=getch.getch() #blocks code and waits for key
+        massage=key.encode()
+        tcp_socket.send(massage)
+
+
 team_name = 'Shalev&Itai'
 client = Client(team_name)
 client.run_client()
