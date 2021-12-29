@@ -144,5 +144,5 @@ class server:
         time.sleep(10)
         self.flag = True
 
-s = server(dev=True)
+s = server(dev=False)
 s.run_server()

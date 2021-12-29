@@ -84,6 +84,6 @@ class Client:
         tcp_socket.send(massage)
 
 
-team_name = 'Shalev&Itai'
+team_name = 'sucket for pain'
 client = Client(team_name)
 client.run_client()
