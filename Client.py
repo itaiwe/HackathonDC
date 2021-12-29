@@ -24,11 +24,14 @@ class Client:
             udp_socket.bind(("", self.port))
             
             data, address = udp_socket.recvfrom(2048) ##check that
-            info = struct.unpack("Ibh", data) ##I-unsigned int 4B b-signed char 1B h-short 2B
-            tcp_ip = address[0]
-            tcp_socket = self.check_offers(info, tcp_ip)
-            if tcp_socket is not None:
-                self.game_mode(tcp_socket)
+            try:
+                info = struct.unpack("IbH", data) ##I-unsigned int 4B b-signed char 1B h-short 2B
+                tcp_ip = address[0]
+                tcp_socket = self.check_offers(info, tcp_ip)
+                if tcp_socket is not None:
+                    self.game_mode(tcp_socket)
+            except:
+                continue
     
     def check_offers(self, info, tcp_ip):
         

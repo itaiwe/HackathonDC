@@ -8,11 +8,11 @@ import random
 
 
 class server:
-    def __init__(self): #maybe add eth and set to eth1 or eth2 when creating server
+    def __init__(self, dev): #maybe add eth and set to eth1 or eth2 when creating server
         self.port = 13117
         self.cookie = 0xabcddcba
         self.msg_type = 0x2
-        self.server_ip = scapy.get_if_addr(scapy.conf.iface) #scapy.conf.iface
+        self.server_ip = scapy.get_if_addr("eth1" if dev else "eth2") #scapy.conf.iface
         self.tcp_port = 25000
         self.users = 0
         self.equations = [("3+3","6"),("3+2","5"),("1+2","3"),("7+1","8"),("1+1","2")]
@@ -20,11 +20,11 @@ class server:
         self.message = ""
         self.mutex = threading.Lock()
         self.team_names = []
-        self.sockets=[]
+        self.sockets = []
         
     def send_udp_offer(self, tcp_port, udp_socket:socket):
         while self.users < 2:
-            format = "Ibh"
+            format = "IbH"
             offer = struct.pack(format, self.cookie, self.msg_type, tcp_port)
             udp_socket.sendto(offer, ('<broadcast>', self.port))
             time.sleep(1)
@@ -48,7 +48,7 @@ class server:
             message = f"""Welcome to Quick Maths.
             Player 1: {self.team_names[0]}Player 2: {self.team_names[1]}==
             Please answer the following question as fast as you can:
-            How much is: {question}?""".encode() #add formula here
+            How much is: {question}?""".encode() 
             self.message = f'Game over!\nThe correct answer was {answer}!\n\nGame ended in a draw!'
             thread_player1 = threading.Thread(target=self.game_mode, args=(self.sockets[0], message, answer, 0))
             thread_player2 = threading.Thread(target=self.game_mode, args=(self.sockets[1], message, answer, 1))
@@ -95,7 +95,7 @@ class server:
                 self.mutex.acquire(1)
                 if data == answer and not self.flag:
                     self.message = f'Game over!\nThe correct answer was {answer}!\n\nCongratulations to the winner: {self.team_names[idx]}'.strip('\n')
-                else:
+                elif data != answer and not self.flag:
                     self.message = f'Game over!\nThe correct answer was {answer}!\n\nCongratulations to the winner: {self.team_names[abs(idx - 1)]}'.strip('\n')
                 self.flag = True
                 self.mutex.release()
@@ -116,5 +116,5 @@ class server:
         # for s in self.sockets:
         #     s.setblocking(False)
 
-s=server()
+s = server(dev=True)
 s.run_server()
