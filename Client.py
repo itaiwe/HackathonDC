@@ -14,8 +14,8 @@ class Client:
         self.flag=True
     
     def run_client(self):
+        print("Client started, listening for offer requests...")
         while True:
-            print("Client started, listening for offer requests...")
             self.flag=True
             # creating udp socket
             udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # setting UDP socket
