@@ -38,7 +38,7 @@ class server:
         while self.users < 2:
             format = "IbH"
             offer = struct.pack(format, self.cookie, self.msg_type, tcp_port)
-            udp_socket.sendto(offer, ('<broadcast>', self.port)) # sending broadcast message to all possible clients
+            udp_socket.sendto(offer, ('172.99.255.255', self.port)) # sending broadcast message to all possible clients
             time.sleep(1)
             
     def run_server(self):

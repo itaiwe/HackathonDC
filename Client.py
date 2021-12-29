@@ -24,7 +24,7 @@ class Client:
             udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # setting UDP socket
             udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1) # enabling option to broadcast for ip address
             udp_socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEPORT, 1) # enabling reusability of port for self check
-            udp_socket.bind(("", self.port))
+            udp_socket.bind(("172.99.255.255", self.port))
             
             data, address = udp_socket.recvfrom(2048) # receiving packet for connecting to TCP
             try:
