@@ -61,7 +61,7 @@ class server:
             time.sleep(10)
             question, answer = random.choice(self.equations)
             message = f"""Welcome to Quick Maths.\nPlayer 1: {self.team_names[0]}Player 2: {self.team_names[1]}==\nPlease answer the following question as fast as you can:\nHow much is: {question}?""".encode() 
-            for i in len(self.message):
+            for i in range(len(self.message)):
                 self.message[i] = f'Game over!\nThe correct answer was {answer}!\n\nGame ended in a draw!'
             thread_player1 = threading.Thread(target=self.game_mode, args=(self.sockets[0], message, answer, 0))
             thread_player2 = threading.Thread(target=self.game_mode, args=(self.sockets[1], message, answer, 1))
