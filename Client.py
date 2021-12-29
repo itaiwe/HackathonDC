@@ -4,6 +4,7 @@ import time
 from datetime import datetime
 import getch
 import multiprocessing as mul_proc
+from colors import colors
 
 class Client:
     def __init__(self, team):
@@ -16,7 +17,7 @@ class Client:
     def run_client(self):
         """Main function of Client
         """
-        print("Client started, listening for offer requests...")
+        print(colors.front.BOLD+colors.front.UNDERLINE+colors.LIGHTGREEN+"Client started,"+colors.ENDC+colors.LIGHTGREEN+" listening for offer requests..."+colors.ENDC)
         while True:
             self.flag=True
             # creating udp socket
@@ -44,7 +45,7 @@ class Client:
         """
         if info[0]==self.cookie and info[1]==self.msg_type:
             server_port=info[2]
-            print(f"Received offer from {tcp_ip} attempting to connect...")
+            print(colors.LIGHTBLUE+"Received offer from "+colors.front.BOLD+colors.ORANGE+f"{tcp_ip}"+colors.ENDC+colors.LIGHTBLUE+" attempting to connect..."+colors.ENDC)
             tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # creating socket for TCP connection
             tcp_socket.connect((tcp_ip, server_port)) # connecting to server
             massage=f"{self.name}\n".encode() #sending name
@@ -60,7 +61,7 @@ class Client:
             tcp_socket ([socket]): [Client's socket for game]
         """
         data = tcp_socket.recv(2048)
-        print(data.decode())
+        print(colors.GREEN+data.decode()+colors.ENDC)
         p = mul_proc.Process(target=self.get_user_key,args=(tcp_socket,)) # starting process for getch so we will be able to stop if other client answered and finished the game
         p.start()
         while self.flag:
@@ -72,9 +73,9 @@ class Client:
                 pass
         p.terminate() # killing the process if summary was sent
         p.join()
-        print(summary.decode())
+        print(colors.PURPLE+summary.decode()+colors.ENDC)
         tcp_socket.close()
-        print("Server disconnected, listening for offer requests...")
+        print(colors.front.BOLD+colors.front.UNDERLINE+colors.RED+"Server disconnected,"+colors.ENDC+colors.YELLOW+" listening for offer requests..."+colors.ENDC)
         
     
     def get_user_key(self,tcp_socket):
