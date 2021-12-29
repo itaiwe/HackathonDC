@@ -49,7 +49,7 @@ class Client:
     def game_mode(self, tcp_socket):
         data=tcp_socket.recv(2048)
         print(data.decode())
-        p=mul_proc.Process(target=self.get_user_key,args=(tcp_socket))
+        p=mul_proc.Process(target=self.get_user_key,args=(tcp_socket,))
         p.start()
         while self.flag:
             try:
